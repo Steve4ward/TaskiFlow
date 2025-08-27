@@ -1,4 +1,6 @@
 import TransitionButtons from "@/components/request/TransitionButtons";
+import { notFound } from "next/navigation";
+import { apiFetch } from "@/lib/api";
 
 type Status = "PENDING" | "IN_PROGRESS" | "IN_REVIEW" | "DONE";
 type EventItem = { id: string; type: string; createdAt: string };
@@ -13,13 +15,14 @@ type RequestDetail = {
 };
 
 async function getDetail(id: string) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/requests/${id}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Not found");
+  const res = await apiFetch(`/api/requests/${id}`);
+  if (!res.ok) throw notFound();
   return res.json() as Promise<RequestDetail>;
 }
 
-export default async function Page({ params }: { params: { id: string }}) {
-  const r = await getDetail(params.id);
+export default async function Page({ params }: { params: Promise<{ id: string }>}) {
+  const { id } = await params;   
+  const r = await getDetail(id);
   return (
     <div className="space-y-6">
       <div>
