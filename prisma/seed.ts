@@ -1,5 +1,6 @@
-import { PrismaClient, RequestStatus, Role } from "@prisma/client";
-const prisma = new PrismaClient();
+import { RequestStatus, Role } from "@prisma/client";
+import { prisma } from "../src/lib/db";
+import type { Prisma } from "@prisma/client";
 
 async function main() {
   // Demo org
@@ -77,8 +78,8 @@ async function main() {
   // Snapshots + audit
   await prisma.requestSnapshot.createMany({
     data: [
-      { requestId: r1.id, status: r1.status, formData: r1.formData as any },
-      { requestId: r2.id, status: r2.status, formData: r2.formData as any },
+      { requestId: r1.id, status: r1.status, formData: r1.formData as Prisma.InputJsonValue },
+      { requestId: r2.id, status: r2.status, formData: r1.formData as Prisma.InputJsonValue },
     ],
   });
 
