@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
 
   const { status, q, from, to, limit } = parsed.data;
 
-  const where: any = { orgId: org.id };
+  const where: Prisma.RequestWhereInput = { orgId: org.id };
   if (status) where.status = status as RequestStatus;
   if (q) where.title = { contains: q, mode: "insensitive" };
   if (from || to) where.createdAt = { ...(from && { gte: from }), ...(to && { lte: to }) };
@@ -54,8 +54,6 @@ export async function POST(req: NextRequest) {
   // Optional: attach SLA dueAt (naive baseline: 72h)
   const dueAt = new Date(Date.now() + 72 * 3600 * 1000);
 
-  const formDataJson = formData as Prisma.InputJsonValue;
-
   const created = await prisma.$transaction(async (tx) => {
     const r = await tx.request.create({
       data: {
@@ -63,7 +61,7 @@ export async function POST(req: NextRequest) {
         templateId: templateId ?? null,
         title,
         status: "PENDING",
-        formData: formDataJson,
+        formData: formData as Prisma.InputJsonValue,
         requesterId: user.id,
         assigneeId: null,
         dueAt,
@@ -71,7 +69,11 @@ export async function POST(req: NextRequest) {
     });
 
     await tx.requestSnapshot.create({
-      data: { requestId: r.id, status: r.status, formData: r.formData as any },
+      data: {
+        requestId: r.id,
+        status: r.status,
+        formData: r.formData as Prisma.InputJsonValue,
+      },
     });
 
     await tx.auditEvent.create({
