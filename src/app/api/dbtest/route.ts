@@ -1,14 +1,26 @@
-import { auth } from "@clerk/nextjs/server";
+// import { auth } from "@clerk/nextjs/server";
+// import { prisma } from "@/lib/db";
+
+// export async function GET() {
+//   const { orgId } = await auth();
+//   if (!orgId) return new Response("No active organization", { status: 403 });
+
+//   const [orgs, requests] = await Promise.all([
+//     prisma.organization.count(),
+//     prisma.request.count({ where: { orgId } }),
+//   ]);
+
+//   return Response.json({ ok: true, orgs, requestsForActiveOrg: requests });
+// }
+
+import { ensureActiveOrg } from "@/lib/org";
 import { prisma } from "@/lib/db";
 
 export async function GET() {
-  const { orgId } = await auth();
-  if (!orgId) return new Response("No active organization", { status: 403 });
-
+  const org = await ensureActiveOrg();
   const [orgs, requests] = await Promise.all([
     prisma.organization.count(),
-    prisma.request.count({ where: { orgId } }),
+    prisma.request.count({ where: { orgId: org.id } }),
   ]);
-
-  return Response.json({ ok: true, orgs, requestsForActiveOrg: requests });
+  return Response.json({ ok: true, orgs, activeOrg: { id: org.id, name: org.name }, requestsForActiveOrg: requests });
 }
