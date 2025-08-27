@@ -3,7 +3,7 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 
 export async function ensureActiveOrg() {
   const { orgId, orgSlug } = await auth();
-  if (!orgId) throw new Error("No active organization");
+  if (!orgId) throw new Response("No active organization", { status: 403 });
 
   // If already present in our DB, return it
   const found = await prisma.organization.findUnique({ where: { id: orgId } });
