@@ -1,22 +1,7 @@
 import { prisma } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { getUserRole } from "@/lib/auth";
-
-type Role = "REQUESTOR" | "MANAGER" | "ADMIN";
-type ShowIf = { field: string; op: "==" | "!=" | ">" | ">=" | "<" | "<="; value: unknown };
-
-type Field = {
-  key: string;
-  label?: string;
-  type?: string;
-  required?: boolean;
-  options?: unknown[];
-  visibleForRoles?: Role[];
-  editableForRoles?: Role[];
-  showIf?: ShowIf[];
-};
-
-type TemplateSchema = { fields?: Field[] };
+import { Field, TemplateSchema, ShowIf } from "@/types/form";
 
 function evaluateShowIf(showIf: ShowIf[] | undefined, data: Record<string, unknown>): boolean {
   if (!showIf || showIf.length === 0) return true;

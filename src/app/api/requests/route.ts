@@ -4,7 +4,7 @@ import { ensureActiveOrg } from "@/lib/org";
 import { ensureCurrentUser } from "@/lib/user";
 import { getUserRole } from "@/lib/auth";
 import { emitAudit } from "@/lib/audit";
-import { CreateRequestSchema, ListRequestsSchema } from "@/lib/validation/request";
+import { CreateRequestSchema, ListRequestsSchema } from "@/types/request";
 import { RequestStatus } from "@prisma/client";
 
 import type { Prisma } from "@prisma/client";

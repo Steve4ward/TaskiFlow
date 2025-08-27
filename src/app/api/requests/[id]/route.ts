@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { ensureActiveOrg } from "@/lib/org";
 import { ensureCurrentUser } from "@/lib/user";
 import { getUserRole } from "@/lib/auth";
-import { UpdateRequestSchema } from "@/lib/validation/request";
+import { UpdateRequestSchema } from "@/types/request";
 import { getEditableKeys, redactFormData, applyPatch } from "@/lib/forms";
 import { emitAudit } from "@/lib/audit";
 import type { Prisma } from "@prisma/client";

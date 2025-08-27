@@ -1,5 +1,7 @@
-import { RequestStatus } from "@prisma/client";
+// import { RequestStatus } from "@prisma/client";
 import { getUserRole } from "@/lib/auth";
+
+import type { RequestStatus } from "@/types/rbac"
 
 const ALLOWED: Record<RequestStatus, RequestStatus[]> = {
   PENDING:     ["IN_REVIEW", "REJECTED"],

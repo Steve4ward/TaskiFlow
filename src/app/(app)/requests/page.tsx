@@ -1,20 +1,11 @@
 import Link from "next/link";
 
-type Person = { id: string; name: string | null; email: string | null };
-type Status = "PENDING" | "IN_PROGRESS" | "IN_REVIEW" | "DONE";
-type RequestListItem = {
-  id: string;
-  title: string;
-  status: Status;
-  assignee: Person | null;
-  dueAt: string | null;
-  updatedAt: string;
-};
+import type { RequestDTO } from "@/types/request";
 
 async function getData() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/requests?limit=100`, { cache: "no-store" });
   if (!res.ok) return { items: [] };
-  return res.json() as Promise<{ items: RequestListItem[] }>;
+  return res.json() as Promise<{ items: RequestDTO[] }>;
 }
 
 export default async function Page() {

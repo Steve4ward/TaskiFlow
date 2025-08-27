@@ -1,25 +1,13 @@
 import Link from "next/link";
 
+import type { RequestDTO } from "@/types/request";
+
 export const metadata = { title: "Dashboard • TaskiFlow" };
 
-type Person = { id: string; name: string | null; email: string | null };
-type Status = "PENDING" | "IN_PROGRESS" | "IN_REVIEW" | "DONE";
-
-type RequestListItem = {
-  id: string;
-  title: string;
-  status: Status;
-  dueAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-  requester: Person | null;
-  assignee: Person | null;
-};
-
-async function getRequests(): Promise<{ items: RequestListItem[] }> {
+async function getRequests(): Promise<{ items: RequestDTO[] }> {
   const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/requests?limit=50`, { cache: "no-store" });
   if (!res.ok) return { items: [] };
-  return res.json() as Promise<{ items: RequestListItem[] }>;
+  return res.json() as Promise<{ items: RequestDTO[] }>;
 }
 
 export default async function Page() {
