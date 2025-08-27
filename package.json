@@ -6,11 +6,17 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev --name init",
+    "db:seed": "prisma db seed"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.31.5",
-    "@prisma/client": "^6.14.0",
+    "@prisma/client": "^6.15.0",
     "@supabase/supabase-js": "^2.56.0",
     "next": "15.5.2",
     "react": "19.1.0",
@@ -25,7 +31,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
-    "prisma": "^6.14.0",
+    "prisma": "^6.15.0",
     "tailwindcss": "^4",
     "tsx": "^4.20.5",
     "typescript": "^5",

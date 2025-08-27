@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url               = env("DATABASE_URL")
+  directUrl         = env("DIRECT_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+enum Role {
+  REQUESTOR
+  MANAGER
+  ADMIN
+}
+
+enum RequestStatus {
+  PENDING
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  IN_PROGRESS
+  DONE
+}
+
+model Organization {
+  id        String         @id @default(cuid())
+  name      String
+  users     Membership[]
+  templates FormTemplate[]
+  requests  Request[]
+  events    AuditEvent[]
+  createdAt DateTime       @default(now())
+}
+
+model User {
+  id                String       @id @default(cuid())
+  clerkId           String       @unique
+  email             String       @unique
+  name              String?
+  memberships       Membership[]
+  requestsRequested Request[]    @relation("Requester")
+  requestsAssigned  Request[]    @relation("Assignee")
+  events            AuditEvent[]
+  createdAt         DateTime     @default(now())
+}
+
+model Membership {
+  id     String @id @default(cuid())
+  userId String
+  orgId  String
+  role   Role   @default(REQUESTOR)
+
+  user User         @relation(fields: [userId], references: [id])
+  org  Organization @relation(fields: [orgId], references: [id])
+
+  @@unique([userId, orgId])
+}
+
+model FormTemplate {
+  id        String       @id @default(cuid())
+  orgId     String
+  name      String
+  schema    Json
+  version   Int          @default(1)
+  isActive  Boolean      @default(true)
+  org       Organization @relation(fields: [orgId], references: [id])
+  createdAt DateTime     @default(now())
+  Request   Request[]
+
+  @@index([orgId, isActive])
+}
+
+model Request {
+  id          String            @id @default(cuid())
+  orgId       String
+  templateId  String?
+  title       String
+  status      RequestStatus     @default(PENDING)
+  formData    Json
+  requesterId String
+  assigneeId  String?
+  dueAt       DateTime?
+  org         Organization      @relation(fields: [orgId], references: [id])
+  template    FormTemplate?     @relation(fields: [templateId], references: [id])
+  requester   User              @relation("Requester", fields: [requesterId], references: [id])
+  assignee    User?             @relation("Assignee", fields: [assigneeId], references: [id])
+  events      AuditEvent[]
+  snapshots   RequestSnapshot[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([orgId, status])
+}
+
+model RequestSnapshot {
+  id        String        @id @default(cuid())
+  requestId String
+  status    RequestStatus
+  formData  Json
+  createdAt DateTime      @default(now())
+
+  request Request @relation(fields: [requestId], references: [id])
+}
+
+model AuditEvent {
+  id        String   @id @default(cuid())
+  orgId     String
+  requestId String
+  actorId   String?
+  type      String
+  data      Json
+  createdAt DateTime @default(now())
+
+  org     Organization @relation(fields: [orgId], references: [id])
+  request Request      @relation(fields: [requestId], references: [id])
+  actor   User?        @relation(fields: [actorId], references: [id])
+
+  @@index([orgId, requestId, createdAt])
+}
