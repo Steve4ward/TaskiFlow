@@ -13,3 +13,11 @@ export const ListRequestsSchema = z.object({
   to: z.coerce.date().optional(),     // createdAt <= to
   limit: z.coerce.number().min(1).max(100).default(50),
 });
+
+export const UpdateRequestSchema = z.object({
+  formDataPatch: z.object({}).catchall(z.unknown()).default({}),
+});
+
+export const TransitionSchema = z.object({
+  toStatus: z.enum(["PENDING","IN_REVIEW","APPROVED","REJECTED","IN_PROGRESS","DONE"]),
+});
