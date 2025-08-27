@@ -1,11 +1,14 @@
 import Link from "next/link";
 
+import { absoluteUrl } from "@/lib/url";
+
 import type { RequestDTO } from "@/types/request";
 
 export const metadata = { title: "Dashboard • TaskiFlow" };
 
-async function getRequests(): Promise<{ items: RequestDTO[] }> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/requests?limit=50`, { cache: "no-store" });
+async function getRequests() {
+  const url = await absoluteUrl("/api/requests?limit=50");
+  const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) return { items: [] };
   return res.json() as Promise<{ items: RequestDTO[] }>;
 }
