@@ -11,13 +11,14 @@ import type { Prisma } from "@prisma/client";
 const asJsonObject = (v: Prisma.JsonValue | null | undefined): Prisma.JsonObject =>
   v && typeof v === "object" && !Array.isArray(v) ? (v as Prisma.JsonObject) : {};
 
-export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const org = await ensureActiveOrg();
   const role = await getUserRole();
   const user = await ensureCurrentUser();
 
   const r = await prisma.request.findFirst({
-    where: { id: params.id, orgId: org.id },
+    where: { id: id, orgId: org.id },
     include: {
       requester: { select: { id: true, name: true, email: true } },
       assignee: { select: { id: true, name: true, email: true } },
@@ -50,7 +51,8 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
   });
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const org = await ensureActiveOrg();
   const user = await ensureCurrentUser();
 
@@ -58,7 +60,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const parsed = UpdateRequestSchema.safeParse(body);
   if (!parsed.success) return new Response(JSON.stringify(parsed.error.format()), { status: 400 });
 
-  const r = await prisma.request.findFirst({ where: { id: params.id, orgId: org.id } });
+  const r = await prisma.request.findFirst({ where: { id: id, orgId: org.id } });
   if (!r) return new Response("Not found", { status: 404 });
 
   const allowed = await getEditableKeys({ templateId: r.templateId, formData: asJsonObject(r.formData) });

@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { getUserRole } from "@/lib/auth";
-import { Field, TemplateSchema, ShowIf } from "@/types/form";
+import { TemplateSchema, ShowIf } from "@/types/form";
 
 function evaluateShowIf(showIf: ShowIf[] | undefined, data: Record<string, unknown>): boolean {
   if (!showIf || showIf.length === 0) return true;

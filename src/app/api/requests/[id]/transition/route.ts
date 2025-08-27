@@ -2,13 +2,14 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { ensureActiveOrg } from "@/lib/org";
 import { ensureCurrentUser } from "@/lib/user";
-import { TransitionSchema } from "@/lib/validation/request";
+import { TransitionSchema } from "@/types/request";
 import { canTransition } from "@/lib/status";
 import { emitAudit } from "@/lib/audit";
 
 import type { Prisma } from "@prisma/client";
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const org = await ensureActiveOrg();
   const user = await ensureCurrentUser();
 
@@ -16,7 +17,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const parsed = TransitionSchema.safeParse(body);
   if (!parsed.success) return new Response(JSON.stringify(parsed.error.format()), { status: 400 });
 
-  const r = await prisma.request.findFirst({ where: { id: params.id, orgId: org.id } });
+  const r = await prisma.request.findFirst({ where: { id: id, orgId: org.id } });
   if (!r) return new Response("Not found", { status: 404 });
 
   const check = await canTransition(r.status, parsed.data.toStatus);
