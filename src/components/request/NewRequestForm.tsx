@@ -38,12 +38,11 @@ export default function NewRequestForm({
   const [title, setTitle] = useState("");
   const [values, setValues] = useState<Record<string, unknown>>({});
   const [error, setError] = useState<string | null>(null);
-  const fields = schema.fields ?? [];
 
-  const renderable = useMemo(
-    () => fields.filter((f) => visibleForRequestor(f) && evalShowIf(f.showIf, values)),
-    [fields, values]
-  );
+  const renderable = useMemo(() => {
+    const fields = schema.fields ?? [];
+    return fields.filter((f) => visibleForRequestor(f) && evalShowIf(f.showIf, values));
+  }, [schema.fields, values]);
 
   const setVal = (key: string, v: unknown) =>
     setValues((prev) => ({ ...prev, [key]: v }));

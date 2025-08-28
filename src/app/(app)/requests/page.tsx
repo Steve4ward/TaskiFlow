@@ -1,10 +1,9 @@
 import Link from "next/link";
-import { absoluteUrl } from "@/lib/url";
+import { apiFetch } from "@/lib/api";
 import type { RequestDTO } from "@/types/request";
 
 async function getData() {
-  const url = await absoluteUrl("/api/requests?limit=100");
-  const res = await fetch(url, { cache: "no-store" });
+  const res = await apiFetch("/api/requests?limit=100");
   if (!res.ok) return { items: [] };
   return res.json() as Promise<{ items: RequestDTO[] }>;
 }
