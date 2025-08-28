@@ -1,24 +1,34 @@
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
+import RequestFilters from "@/components/filters/RequestFilters";
 
 import type { RequestDTO } from "@/types/request";
 
 export const metadata = { title: "Dashboard • TaskiFlow" };
 
-async function getRequests() {
-  const res = await apiFetch("/api/requests?limit=50");
+async function fetchItems(qs: string) {
+  const res = await apiFetch(`/api/requests?${qs || "limit=100"}`);
   if (!res.ok) return { items: [] };
   return res.json() as Promise<{ items: RequestDTO[] }>;
 }
 
-export default async function Page() {
-  const { items } = await getRequests();
+export default async function Page({ searchParams }: { searchParams: Promise<{[k:string]: string|undefined}> }) {
+  const sp = await searchParams;
+  const qp = new URLSearchParams();
+  if (sp.q) qp.set("q", sp.q);
+  if (sp.status) qp.set("status", sp.status);
+  if (sp.from) qp.set("from", sp.from);
+  if (sp.to) qp.set("to", sp.to);
+  qp.set("limit","100");
+
+  const { items } = await fetchItems(qp.toString());
   const byStatus = (s: string) => items.filter(i => i.status === s).length;
-  const overdue = items.filter(i => i.dueAt && new Date(i.dueAt).getTime() < Date.now()).length;
+  const inProg = byStatus("IN_PROGRESS") + byStatus("IN_REVIEW");
+  const overdue = items.filter(i => i.dueAt && new Date(i.dueAt).getTime() < Date.now() && i.status !== "DONE").length;
 
   const tiles = [
     { label: "Pending", value: byStatus("PENDING") },
-    { label: "In Progress", value: byStatus("IN_PROGRESS") + byStatus("IN_REVIEW") },
+    { label: "In Progress", value: inProg },
     { label: "Completed", value: byStatus("DONE") },
     { label: "Overdue", value: overdue },
   ];
@@ -26,6 +36,9 @@ export default async function Page() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Dashboard</h1>
+
+      <RequestFilters />
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {tiles.map(t => (
           <div key={t.label} className="rounded-xl border p-4">
@@ -45,7 +58,7 @@ export default async function Page() {
               </tr>
             </thead>
             <tbody>
-              {items.slice(0,8).map(r => (
+              {items.slice(0,12).map(r => (
                 <tr key={r.id} className="[&>td]:px-3 [&>td]:py-2 border-t">
                   <td><Link className="underline" href={`/requests/${r.id}`}>{r.title}</Link></td>
                   <td>{r.status}</td>
