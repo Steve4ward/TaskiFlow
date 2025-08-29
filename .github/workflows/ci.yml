@@ -26,6 +26,7 @@ jobs:
     env:
       DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/taskiflow_ci
       SHADOW_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/taskiflow_ci_shadow
+      DIRECT_URL: postgresql://postgres:postgres@127.0.0.1:5432/taskiflow_ci
       NEXT_TELEMETRY_DISABLED: "1"
       # build should not need these; add if your code requires:
       NEXT_PUBLIC_ENV: ci
