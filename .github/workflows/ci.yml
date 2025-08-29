@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: taskiflow_ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/taskiflow_ci
+      SHADOW_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/taskiflow_ci_shadow
+      NEXT_TELEMETRY_DISABLED: "1"
+      # build should not need these; add if your code requires:
+      NEXT_PUBLIC_ENV: ci
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Prisma generate
+        run: pnpm prisma generate
+
+      - name: Migrate database
+        run: pnpm prisma migrate deploy
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm run -s typecheck
+
+      - name: Build
+        run: pnpm build
+
+      - name: Tests (if any)
+        if: ${{ hashFiles('**/*.test.*', '**/*.spec.*') != '' }}
+        run: pnpm test -- --run
