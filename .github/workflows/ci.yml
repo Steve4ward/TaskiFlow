@@ -63,4 +63,4 @@ jobs:
 
       - name: Tests (if any)
         if: ${{ hashFiles('**/*.test.*', '**/*.spec.*') != '' }}
-        run: pnpm test -- --run
+        run: pnpm test
