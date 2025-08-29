@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ClerkProvider } from "@clerk/nextjs";
 import { getUserRole } from "@/lib/auth";
 import Sidebar from "@/components/shell/Sidebar";
 import Topbar from "@/components/shell/Topbar";
@@ -23,12 +24,14 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     : base;
 
   return (
-    <div className="grid min-h-svh grid-cols-[260px_1fr]">
-      <Sidebar items={items} />
-      <div className="flex flex-col">
-        <Topbar />
-        <main className="p-6">{children}</main>
+    <ClerkProvider>
+      <div className="grid min-h-svh grid-cols-[260px_1fr]">
+        <Sidebar items={items} />
+        <div className="flex flex-col">
+          <Topbar />
+          <main className="p-6">{children}</main>
+        </div>
       </div>
-    </div>
+    </ClerkProvider>
   );
 }
