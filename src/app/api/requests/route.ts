@@ -4,6 +4,7 @@ import { ensureActiveOrg } from "@/lib/org";
 import { ensureCurrentUser } from "@/lib/user";
 import { getUserRole } from "@/lib/auth";
 import { emitAudit } from "@/lib/audit";
+import { queueOutbox } from "@/lib/outbox";
 import { CreateRequestSchema, ListRequestsSchema } from "@/types/request";
 import { RequestStatus } from "@prisma/client";
 
@@ -85,6 +86,8 @@ export async function POST(req: NextRequest) {
         data: { title: r.title },
       },
     });
+
+    await queueOutbox(tx, { orgId: org.id, requestId: r.id, type: "REQUEST_CREATED", payload: { title } });
 
     return r;
   });

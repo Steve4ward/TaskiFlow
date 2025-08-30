@@ -5,6 +5,7 @@ import { ensureCurrentUser } from "@/lib/user";
 import { TransitionSchema } from "@/types/request";
 import { canTransition } from "@/lib/status";
 import { emitAudit } from "@/lib/audit";
+import { queueOutbox } from "@/lib/outbox";
 
 import type { Prisma } from "@prisma/client";
 
@@ -38,6 +39,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       type: "STATUS_CHANGED",
       data: { from: r.status, to: u.status },
     });
+    await queueOutbox(tx, { orgId: org.id, requestId: r.id, type: "STATUS_CHANGED", payload: { to: u.status } });
     return u;
   });
 

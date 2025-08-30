@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
 import RequestFilters from "@/components/filters/RequestFilters";
+import OrgEvents from "@/components/realtime/OrgEvents";
 
 import type { RequestDTO } from "@/types/request";
 
@@ -38,6 +39,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{[k
       <h1 className="text-2xl font-semibold">Dashboard</h1>
 
       <RequestFilters />
+      <OrgEvents />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {tiles.map(t => (

@@ -119,3 +119,16 @@ model AuditEvent {
 
   @@index([orgId, requestId, createdAt])
 }
+
+model RequestEventOutbox {
+  id          String   @id @default(cuid())
+  orgId       String
+  requestId   String
+  type        String
+  payload     Json
+  createdAt   DateTime @default(now())
+  processedAt DateTime?
+
+  @@index([orgId, createdAt])
+  @@index([processedAt, createdAt])
+}

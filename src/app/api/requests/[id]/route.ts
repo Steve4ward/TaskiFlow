@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { ensureActiveOrg } from "@/lib/org";
 import { ensureCurrentUser } from "@/lib/user";
 import { getUserRole } from "@/lib/auth";
+import { queueOutbox } from "@/lib/outbox";
 import { UpdateRequestSchema } from "@/types/request";
 import { getEditableKeys, redactFormData, applyPatch } from "@/lib/forms";
 import { emitAudit } from "@/lib/audit";
@@ -86,6 +87,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     type: "FIELD_UPDATED",
     data: { keys: changed },
   });
+
+  await queueOutbox(prisma, { orgId: org.id, requestId: r.id, type: "FIELD_UPDATED", payload: { keys: changed } });
 
   return Response.json({ ok: true, id: updated.id, changed });
 }
