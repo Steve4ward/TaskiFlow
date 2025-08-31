@@ -28,8 +28,10 @@ jobs:
       SHADOW_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/taskiflow_ci_shadow
       DIRECT_URL: postgresql://postgres:postgres@127.0.0.1:5432/taskiflow_ci
       NEXT_TELEMETRY_DISABLED: "1"
-      # build should not need these; add if your code requires:
       NEXT_PUBLIC_ENV: ci
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_12345678901234567890
+      CLERK_SECRET_KEY: sk_test_12345678901234567890
 
     steps:
       - uses: actions/checkout@v4

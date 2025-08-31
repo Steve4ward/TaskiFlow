@@ -4,6 +4,8 @@ import Sidebar from "@/components/shell/Sidebar";
 import Topbar from "@/components/shell/Topbar";
 import "../globals.css";
 
+export const dynamic = "force-dynamic";
+
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const role = await getUserRole(); // "REQUESTOR" | "MANAGER" | "ADMIN"
   const base = [
