@@ -49,6 +49,8 @@ async function main() {
     },
   });
 
+  const addHours = (d: Date, h: number) => new Date(d.getTime() + h * 3600_000);
+
   // Sample requests
   const r1 = await prisma.request.create({
     data: {
@@ -59,7 +61,7 @@ async function main() {
       formData: { customer_name: "ACME Logistics", priority: "P1" },
       requesterId: req1.id,
       assigneeId: manager.id,
-      dueAt: new Date(Date.now() + 72 * 3600 * 1000),
+      dueAt: template.slaHours ? addHours(new Date(), template.slaHours) : null,
     },
   });
 
@@ -71,7 +73,7 @@ async function main() {
       status: RequestStatus.PENDING,
       formData: { customer_name: "BlueOcean Shipping", priority: "P2" },
       requesterId: req2.id,
-      dueAt: new Date(Date.now() + 120 * 3600 * 1000),
+      dueAt: template.slaHours ? addHours(new Date(), template.slaHours) : null,
     },
   });
 

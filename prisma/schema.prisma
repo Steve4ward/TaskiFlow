@@ -67,6 +67,7 @@ model FormTemplate {
   isActive  Boolean      @default(true)
   org       Organization @relation(fields: [orgId], references: [id])
   createdAt DateTime     @default(now())
+  slaHours  Int?      @default(72) // default 72h
   Request   Request[]
 
   @@index([orgId, isActive])

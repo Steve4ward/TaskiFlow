@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
+import { isOverdue, isDueSoon } from "@/lib/sla";
 import RequestFilters from "@/components/filters/RequestFilters";
 import OrgEvents from "@/components/realtime/OrgEvents";
 
@@ -25,12 +26,14 @@ export default async function Page({ searchParams }: { searchParams: Promise<{[k
   const { items } = await fetchItems(qp.toString());
   const byStatus = (s: string) => items.filter(i => i.status === s).length;
   const inProg = byStatus("IN_PROGRESS") + byStatus("IN_REVIEW");
-  const overdue = items.filter(i => i.dueAt && new Date(i.dueAt).getTime() < Date.now() && i.status !== "DONE").length;
+  const overdue = items.filter(i => isOverdue(i.dueAt, i.status)).length;
+  const dueSoon = items.filter(i => isDueSoon(i.dueAt, i.status, 24)).length;
 
   const tiles = [
     { label: "Pending", value: byStatus("PENDING") },
     { label: "In Progress", value: inProg },
-    { label: "Completed", value: byStatus("DONE") },
+    // { label: "Completed", value: byStatus("DONE") },
+    { label: "Due soon (24h)", value: dueSoon },
     { label: "Overdue", value: overdue },
   ];
 

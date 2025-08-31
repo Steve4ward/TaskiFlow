@@ -7,6 +7,7 @@ import { emitAudit } from "@/lib/audit";
 import { queueOutbox } from "@/lib/outbox";
 import { CreateRequestSchema, ListRequestsSchema } from "@/types/request";
 import { RequestStatus } from "@prisma/client";
+import { calcDueAt } from "@/lib/sla";
 
 import type { Prisma } from "@prisma/client";
 
@@ -53,7 +54,10 @@ export async function POST(req: NextRequest) {
   const { title, templateId, formData } = parsed.data;
 
   // Optional: attach SLA dueAt (naive baseline: 72h)
-  const dueAt = new Date(Date.now() + 72 * 3600 * 1000);
+  const tpl = parsed.data.templateId
+    ? await prisma.formTemplate.findUnique({ where: { id: parsed.data.templateId }, select: { slaHours: true } })
+    : null;
+  const dueAt = calcDueAt({ slaHours: tpl?.slaHours ?? 72 });
 
   const created = await prisma.$transaction(async (tx) => {
     const r = await tx.request.create({
