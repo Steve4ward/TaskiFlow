@@ -7,6 +7,7 @@ import { queueOutbox } from "@/lib/outbox";
 import { UpdateRequestSchema } from "@/types/request";
 import { getEditableKeys, redactFormData, applyPatch } from "@/lib/forms";
 import { emitAudit } from "@/lib/audit";
+import { notify } from "@/lib/notify";
 import type { Prisma } from "@prisma/client";
 
 const asJsonObject = (v: Prisma.JsonValue | null | undefined): Prisma.JsonObject =>
@@ -89,6 +90,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   });
 
   await queueOutbox(prisma, { orgId: org.id, requestId: r.id, type: "FIELD_UPDATED", payload: { keys: changed } });
+  const reqRow = await prisma.request.findUnique({ where: { id: r.id }, select:{ assigneeId:true, title:true }});
+  if (reqRow?.assigneeId) await notify(reqRow.assigneeId, org.id, "Fields updated", `${reqRow.title} (${changed.join(", ")})`);
 
   return Response.json({ ok: true, id: updated.id, changed });
 }

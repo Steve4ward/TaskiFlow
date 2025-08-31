@@ -8,6 +8,7 @@ import { queueOutbox } from "@/lib/outbox";
 import { CreateRequestSchema, ListRequestsSchema } from "@/types/request";
 import { RequestStatus } from "@prisma/client";
 import { calcDueAt } from "@/lib/sla";
+import { notify } from "@/lib/notify";
 
 import type { Prisma } from "@prisma/client";
 
@@ -92,6 +93,7 @@ export async function POST(req: NextRequest) {
     });
 
     await queueOutbox(tx, { orgId: org.id, requestId: r.id, type: "REQUEST_CREATED", payload: { title } });
+    await notify(user.id, org.id, "Request created", `“${title}” was created.`);
 
     return r;
   });

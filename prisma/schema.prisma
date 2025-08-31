@@ -133,3 +133,16 @@ model RequestEventOutbox {
   @@index([orgId, createdAt])
   @@index([processedAt, createdAt])
 }
+
+model Notification {
+  id        String   @id @default(cuid())
+  orgId     String
+  userId    String
+  kind      String   @default("IN_APP")
+  title     String
+  body      String
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([orgId, userId, createdAt])
+}

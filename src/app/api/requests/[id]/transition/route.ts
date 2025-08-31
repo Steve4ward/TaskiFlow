@@ -6,6 +6,7 @@ import { TransitionSchema } from "@/types/request";
 import { canTransition } from "@/lib/status";
 import { emitAudit } from "@/lib/audit";
 import { queueOutbox } from "@/lib/outbox";
+import { notify } from "@/lib/notify";
 
 import type { Prisma } from "@prisma/client";
 
@@ -28,9 +29,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const u = await tx.request.update({
       where: { id: r.id },
       data: { status: parsed.data.toStatus },
+      select: { id: true, status: true, formData: true },
     });
     await tx.requestSnapshot.create({
-      data: { requestId: r.id, status: u.status, formData: (u.formData as unknown) as Prisma.InputJsonValue },
+      data: { requestId: r.id, status: u.status, formData: (u.formData) as Prisma.InputJsonValue },
     });
     await emitAudit({
       orgId: org.id,
@@ -42,6 +44,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     await queueOutbox(tx, { orgId: org.id, requestId: r.id, type: "STATUS_CHANGED", payload: { to: u.status } });
     return u;
   });
+
+  const meta = await prisma.request.findUnique({
+    where: { id: r.id },
+    select: { title: true, requesterId: true, assigneeId: true },
+  });
+
+  if (meta) {
+    await notify(meta.requesterId, org.id, "Status updated", `${meta.title} → ${updated.status}`);
+    if (meta.assigneeId) await notify(meta.assigneeId, org.id, "Request updated", `${meta.title} → ${updated.status}`);
+  }
 
   return Response.json({ ok: true, id: updated.id, status: updated.status });
 }
