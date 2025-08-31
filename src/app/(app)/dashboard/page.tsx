@@ -39,7 +39,15 @@ export default async function Page({ searchParams }: { searchParams: Promise<{[k
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Dashboard</h1>
+      <h1 className="text-2xl font-semibold flex items-center justify-between">
+        <span>Dashboard</span>
+        <Link
+          href="/api/reports/requests?range=last_30&format=csv"
+          className="rounded border px-3 py-1 text-sm hover:bg-black/5"
+        >
+          Export CSV (30d)
+        </Link>
+      </h1>
 
       <RequestFilters />
       <OrgEvents />
