@@ -24,10 +24,10 @@ export default function Page() {
           <Link href="/sign-up" className="rounded border px-4 py-2 text-sm font-medium hover:bg-black/5">
             Get started
           </Link>
-          <Link href="/dashboard" className="rounded border px-4 py-2 text-sm hover:bg-black/5">
-            View demo
-          </Link>
-        </div>
+          <form action="/api/demo/seed-current" method="post">
+            <button className="rounded border px-4 py-2 text-sm hover:bg-black/5">Try the Demo</button>
+          </form>
+        </div>  
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
