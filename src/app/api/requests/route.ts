@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { ensureActiveOrg } from "@/lib/org";
 import { ensureCurrentUser } from "@/lib/user";
@@ -6,11 +6,13 @@ import { getUserRole } from "@/lib/auth";
 import { emitAudit } from "@/lib/audit";
 import { queueOutbox } from "@/lib/outbox";
 import { CreateRequestSchema, ListRequestsSchema } from "@/types/request";
-import { RequestStatus } from "@prisma/client";
+import { RequestStatus, Prisma } from "@prisma/client";
 import { calcDueAt } from "@/lib/sla";
 import { notify } from "@/lib/notify";
 
-import type { Prisma } from "@prisma/client";
+import { RequestsListResponseDTO, CreateRequestResponseDTO } from "@/lib/dto/request";
+import { mapList } from "@/lib/dto/map";
+import { applyListCacheHeaders } from "@/lib/http/cache";
 
 export async function GET(req: NextRequest) {
   const org = await ensureActiveOrg();
@@ -26,11 +28,9 @@ export async function GET(req: NextRequest) {
   if (status) where.status = status as RequestStatus;
   if (q) where.title = { contains: q, mode: "insensitive" };
   if (from || to) where.createdAt = { ...(from && { gte: from }), ...(to && { lte: to }) };
-
-  // Role scoping: requestors see only their own; managers/admin see all org
   if (role === "REQUESTOR") where.requesterId = user.id;
 
-  const items = await prisma.request.findMany({
+  const rows = await prisma.request.findMany({
     where,
     orderBy: { createdAt: "desc" },
     take: limit,
@@ -41,7 +41,11 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  return Response.json({ items });
+  const payload = mapList(rows);
+  const validated = RequestsListResponseDTO.parse(payload);
+
+  const res = NextResponse.json(validated);
+  return applyListCacheHeaders(res);
 }
 
 export async function POST(req: NextRequest) {
@@ -54,7 +58,6 @@ export async function POST(req: NextRequest) {
 
   const { title, templateId, formData } = parsed.data;
 
-  // Optional: attach SLA dueAt (naive baseline: 72h)
   const tpl = parsed.data.templateId
     ? await prisma.formTemplate.findUnique({ where: { id: parsed.data.templateId }, select: { slaHours: true } })
     : null;
@@ -100,6 +103,8 @@ export async function POST(req: NextRequest) {
 
   // (optional) side-channel emit
   await emitAudit({ orgId: org.id, requestId: created.id, actorId: user.id, type: "REQUEST_CREATED_DUP", data: {} });
-
-  return Response.json({ id: created.id }, { status: 201 });
+  
+  const payload = { id: created.id };
+  const validated = CreateRequestResponseDTO.parse(payload);
+  return NextResponse.json(validated, { status: 201 });
 }
