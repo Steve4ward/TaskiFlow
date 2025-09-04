@@ -31,7 +31,7 @@ export default function NotificationsPanel() {
         🔔 {unread ? <span className="ml-1 rounded bg-rose-500 px-1 text-white text-[10px]">{unread}</span> : null}
       </button>
       {open && (
-        <div className="absolute right-0 mt-2 w-80 rounded-xl borde shadow p-2 z-50">
+        <div className="absolute right-0 mt-2 w-80 rounded-xl border bg-white shadow p-2 z-50">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm font-medium">Notifications</div>
             <button onClick={markAllRead} className="text-xs underline">Mark all read</button>
