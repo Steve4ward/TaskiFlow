@@ -33,3 +33,5 @@ export async function requireRole(min: AppRole) {
   if (RANK[role] < RANK[min]) throw new Response("Forbidden", { status: 403 });
   return role;
 }
+
+export { auth } from "@clerk/nextjs/server";

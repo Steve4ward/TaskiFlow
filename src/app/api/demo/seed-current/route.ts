@@ -1,6 +1,6 @@
 // app/api/demo/seed-current/route.ts
 import type { NextRequest } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { Role, RequestStatus, Prisma } from "@prisma/client";
 

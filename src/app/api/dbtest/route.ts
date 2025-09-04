@@ -1,4 +1,4 @@
-// import { auth } from "@clerk/nextjs/server";
+// import { auth } from "@/lib/auth";
 // import { prisma } from "@/lib/db";
 
 // export async function GET() {

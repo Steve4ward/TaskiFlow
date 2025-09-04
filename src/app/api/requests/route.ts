@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
     orderBy: { createdAt: "desc" },
     take: limit,
     select: {
-      id: true, title: true, status: true, dueAt: true, createdAt: true, updatedAt: true,
+      id: true, orgId: true, title: true, status: true, dueAt: true, createdAt: true, updatedAt: true,
       requester: { select: { id: true, name: true, email: true } },
       assignee: { select: { id: true, name: true, email: true } },
     },
