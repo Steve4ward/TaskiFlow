@@ -87,31 +87,41 @@ export default function ApprovalsTable({ items }: { items: RequestDTO[] }) {
       <table className="w-full text-sm">
         <thead>
           <tr className="[&>th]:px-3 [&>th]:py-2 text-left opacity-70">
-            <th>Title</th>
-            <th>
+            <th scope="col">Title</th>
+
+            <th
+              scope="col"
+              aria-sort={sortKey === "status" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+            >
               <button
                 type="button"
                 onClick={() => toggleSort("status")}
-                aria-sort={sortKey === "status" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+                aria-label="Sort by status"
                 className="inline-flex items-center gap-1 underline-offset-2 hover:underline"
               >
                 Status <span className="text-xs">{caret(sortDir, sortKey === "status")}</span>
               </button>
             </th>
-            <th>Requester</th>
-            <th>Assignee</th>
-            <th>
+
+            <th scope="col">Requester</th>
+            <th scope="col">Assignee</th>
+
+            <th
+              scope="col"
+              aria-sort={sortKey === "dueAt" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+            >
               <button
                 type="button"
                 onClick={() => toggleSort("dueAt")}
-                aria-sort={sortKey === "dueAt" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+                aria-label="Sort by due date"
                 className="inline-flex items-center gap-1 underline-offset-2 hover:underline"
               >
                 Due <span className="text-xs">{caret(sortDir, sortKey === "dueAt")}</span>
               </button>
             </th>
-            <th>Updated</th>
-            <th className="w-64">Actions</th>
+
+            <th scope="col">Updated</th>
+            <th scope="col" className="w-64">Actions</th>
           </tr>
         </thead>
         <tbody>
